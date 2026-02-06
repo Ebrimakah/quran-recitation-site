@@ -1,48 +1,66 @@
-const audio = document.getElementById("audioPlayer");
-const select = document.getElementById("surahSelect");
+const audioPlayer = document.getElementById("audioPlayer");
+const surahSelect = document.getElementById("surahSelect");
 const nowPlaying = document.getElementById("nowPlaying");
-const prevBtn = document.getElementById("prevBtn");
 const nextBtn = document.getElementById("nextBtn");
-
-let currentSurah = 1;
-
-for (let i = 1; i <= 114; i++) {
-    const option = document.createElement("option");
-    const fileNumber = i.toString().padStart(3, '0');
-    option.value = fileNumber + ".mp3";
-    option.text = `Surah ${i}`;
-    select.appendChild(option);
-}
-function playSurah(num) {
-    const fileNumber = num.toString().padStart(3, '0');
-    audio.src = "audio/" + fileNumber + ".mp3";
-    audio.load();
-    audio.play();
-    nowPlaying.textContent = "Now playing: Surah " + num;
-    select.value = fileNumber + ".mp3";
-}
-select.addEventListener("change", function() {
-    const selected = this.selectedIndex + 1;
-    currentSurah = selected;
-    playSurah(currentSurah);
-});
-nextBtn.addEventListener("click", function() {
-    if (currentSurah < 114) currentSurah++;
-    playSurah(currentSurah);
-});
-prevBtn.addEventListener("click", function() {
-    if (currentSurah > 1) currentSurah--;
-    playSurah(currentSurah);
-});
-playSurah(currentSurah);
-
-document.body.addEventListener('click', function enableAudio() {
-    audio.play().catch(() => {});
-    document.body.removeEventListener('click', enableAudio);
-});
+const prevBtn = document.getElementById("prevBtn");
 const themeToggle = document.getElementById("themeToggle");
 
-themeToggle.addEventListener("click", function() {
-    document.body.classList.toggle("dark-theme");
+const audios = [];
+const totalSurahs = 114;
+
+for (let i = 1; i <= totalSurahs; i++) {
+    const num = String(i).padStart(3, "0");
+    audios.push(`audio/${num}.mp3`);
+}
+
+for (let i = 1; i <= totalSurahs; i++) {
+    const option = document.createElement("option");
+    option.value = i - 1;
+    option.textContent = "Surah " + i;
+    surahSelect.appendChild(option);
+}
+
+let currentIndex = 0;
+
+function playAudio() {
+    audioPlayer.src = audios[currentIndex];
+    nowPlaying.textContent = "Now playing: Surah " + (currentIndex + 1);
+    surahSelect.value = currentIndex;
+    audioPlayer.play();
+}
+
+nextBtn.addEventListener("click", () => {
+    currentIndex++;
+    if (currentIndex >= audios.length) {
+        currentIndex = 0;
+    }
+    playAudio();
 });
 
+prevBtn.addEventListener("click", () => {
+    currentIndex--;
+    if (currentIndex < 0) {
+        currentIndex = audios.length - 1;
+    }
+    playAudio();
+});
+
+surahSelect.addEventListener("change", () => {
+    currentIndex = Number(surahSelect.value);
+    playAudio();
+});
+
+audioPlayer.addEventListener("ended", () => {
+    currentIndex++;
+    if (currentIndex >= audios.length) {
+        currentIndex = 0;
+    }
+    playAudio();
+});
+
+themeToggle.addEventListener("click", () => {
+    document.body.classList.toggle("dark-theme");
+
+});
+
+playAudio();
